@@ -15,10 +15,7 @@ export class SpeedtestController {
   }
 
   @Get('history')
-  async getHistory(
-    @Query('from') from: string = 'now-30d',
-    @Query('to') to: string = 'now',
-  ) {
+  async getHistory(@Query('from') from: string = 'now-30d', @Query('to') to: string = 'now') {
     return this.elastic.querySpeedtestHistory(from, to);
   }
 }

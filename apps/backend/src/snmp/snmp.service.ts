@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+// net-snmp has no TypeScript types — unsafe rules disabled for this file
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -37,7 +42,7 @@ export class SnmpService implements OnModuleInit, OnModuleDestroy {
 
   private startPolling(): void {
     const intervalMs = this.config.get<number>('router.pollIntervalMs')!;
-    this.pollTimer = setInterval(() => void this.poll(), intervalMs);
+    this.pollTimer = setInterval(() => this.poll(), intervalMs);
   }
 
   private stopPolling(): void {
@@ -47,14 +52,11 @@ export class SnmpService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  private async poll(): Promise<void> {
+  private poll(): void {
     const ifIndex = this.config.get<number>('router.snmpIfIndex')!;
-    const oids = [
-      `${OID_IF_IN_OCTETS}.${ifIndex}`,
-      `${OID_IF_OUT_OCTETS}.${ifIndex}`,
-    ];
+    const oids = [`${OID_IF_IN_OCTETS}.${ifIndex}`, `${OID_IF_OUT_OCTETS}.${ifIndex}`];
 
-    this.session!.get(oids, (error, varbinds) => {
+    this.session!.get(oids, (error: Error | null, varbinds: snmp.Varbind[]) => {
       if (error) {
         this.logger.error(`SNMP poll failed: ${error.message}`);
         this.eventEmitter.emit('snmp.error', { message: error.message });

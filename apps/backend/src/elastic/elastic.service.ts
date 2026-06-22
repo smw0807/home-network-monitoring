@@ -59,8 +59,7 @@ export class ElasticService implements OnModuleInit {
   private async createIndexIfAbsent(index: string, properties: Record<string, object>) {
     const exists = await this.client.indices.exists({ index });
     if (!exists) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await this.client.indices.create({ index, mappings: { properties } } as any);
+      await this.client.indices.create({ index, mappings: { properties } });
       this.logger.log(`Created index: ${index}`);
     }
   }
