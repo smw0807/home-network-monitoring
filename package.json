@@ -2,13 +2,9 @@
   "name": "home-network-monitor",
   "private": true,
   "scripts": {
-    "dev:frontend": "npm run dev --workspace=apps/frontend",
-    "dev:backend": "npm run start:dev --workspace=apps/backend",
-    "build:frontend": "npm run build --workspace=apps/frontend",
-    "build:backend": "npm run build --workspace=apps/backend"
-  },
-  "workspaces": [
-    "apps/frontend",
-    "apps/backend"
-  ]
+    "dev:frontend": "npm run dev --prefix apps/frontend",
+    "dev:backend": "npm run start:dev --prefix apps/backend",
+    "build:frontend": "npm run build --prefix apps/frontend",
+    "build:backend": "npm run build --prefix apps/backend"
+  }
 }
