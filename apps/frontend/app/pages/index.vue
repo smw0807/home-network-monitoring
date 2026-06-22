@@ -1,29 +1,51 @@
 <template>
   <div>
-    <h2 class="page-title">대시보드</h2>
+    <h2 class="page-title">
+      대시보드
+    </h2>
 
     <div class="stat-cards">
       <div class="card">
-        <p class="label">↓ 수신 속도</p>
-        <p class="value">{{ inMbps.toFixed(2) }} <span class="unit">Mbps</span></p>
+        <p class="label">
+          ↓ 수신 속도
+        </p>
+        <p class="value">
+          {{ inMbps.toFixed(2) }} <span class="unit">Mbps</span>
+        </p>
       </div>
       <div class="card">
-        <p class="label">↑ 송신 속도</p>
-        <p class="value">{{ outMbps.toFixed(2) }} <span class="unit">Mbps</span></p>
+        <p class="label">
+          ↑ 송신 속도
+        </p>
+        <p class="value">
+          {{ outMbps.toFixed(2) }} <span class="unit">Mbps</span>
+        </p>
       </div>
       <div class="card">
-        <p class="label">총 수신량</p>
-        <p class="value">{{ formatBytes(current?.totalIn ?? 0) }}</p>
+        <p class="label">
+          총 수신량
+        </p>
+        <p class="value">
+          {{ formatBytes(current?.totalIn ?? 0) }}
+        </p>
       </div>
       <div class="card">
-        <p class="label">총 송신량</p>
-        <p class="value">{{ formatBytes(current?.totalOut ?? 0) }}</p>
+        <p class="label">
+          총 송신량
+        </p>
+        <p class="value">
+          {{ formatBytes(current?.totalOut ?? 0) }}
+        </p>
       </div>
     </div>
 
     <div class="chart-section">
       <h3>실시간 트래픽 (최근 60포인트)</h3>
-      <canvas ref="chartCanvas" width="800" height="300" />
+      <canvas
+        ref="chartCanvas"
+        width="800"
+        height="300"
+      />
     </div>
   </div>
 </template>

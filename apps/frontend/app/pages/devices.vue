@@ -1,10 +1,17 @@
 <template>
   <div>
-    <h2 class="page-title">기기 목록</h2>
+    <h2 class="page-title">
+      기기 목록
+    </h2>
 
-    <div v-if="newDeviceAlert" class="alert">
+    <div
+      v-if="newDeviceAlert"
+      class="alert"
+    >
       새 기기 감지: {{ newDeviceAlert.mac }} ({{ newDeviceAlert.ip }})
-      <button @click="newDeviceAlert = null">닫기</button>
+      <button @click="newDeviceAlert = null">
+        닫기
+      </button>
     </div>
 
     <table class="table">
@@ -16,13 +23,18 @@
           <th>별명</th>
           <th>마지막 접속</th>
           <th>화이트리스트</th>
-          <th></th>
+          <th />
         </tr>
       </thead>
       <tbody>
-        <tr v-for="device in devices" :key="device.mac">
+        <tr
+          v-for="device in devices"
+          :key="device.mac"
+        >
           <td>{{ device.ip }}</td>
-          <td class="mono">{{ device.mac }}</td>
+          <td class="mono">
+            {{ device.mac }}
+          </td>
           <td>{{ device.vendor ?? '-' }}</td>
           <td>
             <input
@@ -40,7 +52,7 @@
               @change="toggleWhitelist(device.mac, !device.isWhitelisted)"
             />
           </td>
-          <td></td>
+          <td />
         </tr>
       </tbody>
     </table>

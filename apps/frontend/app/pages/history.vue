@@ -1,19 +1,36 @@
 <template>
   <div>
-    <h2 class="page-title">히스토리</h2>
+    <h2 class="page-title">
+      히스토리
+    </h2>
 
     <div class="filters">
-      <select v-model="range" @change="fetch">
-        <option value="1h">최근 1시간</option>
-        <option value="6h">최근 6시간</option>
-        <option value="24h">최근 24시간</option>
-        <option value="7d">최근 7일</option>
+      <select
+        v-model="range"
+        @change="fetch"
+      >
+        <option value="1h">
+          최근 1시간
+        </option>
+        <option value="6h">
+          최근 6시간
+        </option>
+        <option value="24h">
+          최근 24시간
+        </option>
+        <option value="7d">
+          최근 7일
+        </option>
       </select>
     </div>
 
     <div class="chart-section">
       <h3>시간별 평균 트래픽</h3>
-      <canvas ref="chartCanvas" width="800" height="300" />
+      <canvas
+        ref="chartCanvas"
+        width="800"
+        height="300"
+      />
     </div>
   </div>
 </template>

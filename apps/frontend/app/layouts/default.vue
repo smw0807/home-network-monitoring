@@ -5,8 +5,15 @@
         <h1>Network Monitor</h1>
       </div>
       <ul class="nav-list">
-        <li v-for="item in navItems" :key="item.path">
-          <NuxtLink :to="item.path" class="nav-link" active-class="active">
+        <li
+          v-for="item in navItems"
+          :key="item.path"
+        >
+          <NuxtLink
+            :to="item.path"
+            class="nav-link"
+            active-class="active"
+          >
             {{ item.label }}
           </NuxtLink>
         </li>

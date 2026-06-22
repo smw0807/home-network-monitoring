@@ -1,33 +1,66 @@
 <template>
   <div>
-    <h2 class="page-title">설정</h2>
+    <h2 class="page-title">
+      설정
+    </h2>
 
-    <form v-if="settings" class="form" @submit.prevent="save">
+    <form
+      v-if="settings"
+      class="form"
+      @submit.prevent="save"
+    >
       <div class="form-group">
         <label>공유기 IP</label>
-        <input v-model="settings.routerIp" type="text" />
+        <input
+          v-model="settings.routerIp"
+          type="text"
+        />
       </div>
       <div class="form-group">
         <label>SNMP 커뮤니티</label>
-        <input v-model="settings.snmpCommunity" type="text" />
+        <input
+          v-model="settings.snmpCommunity"
+          type="text"
+        />
       </div>
       <div class="form-group">
         <label>WAN 인터페이스 인덱스</label>
-        <input v-model.number="settings.snmpIfIndex" type="number" min="1" />
+        <input
+          v-model.number="settings.snmpIfIndex"
+          type="number"
+          min="1"
+        />
       </div>
       <div class="form-group">
         <label>폴링 간격 (ms)</label>
-        <input v-model.number="settings.pollIntervalMs" type="number" min="500" />
+        <input
+          v-model.number="settings.pollIntervalMs"
+          type="number"
+          min="500"
+        />
       </div>
       <div class="form-group">
         <label>데이터 보존 기간 (일)</label>
-        <input v-model.number="settings.dataRetentionDays" type="number" min="1" />
+        <input
+          v-model.number="settings.dataRetentionDays"
+          type="number"
+          min="1"
+        />
       </div>
       <div class="form-group">
         <label>트래픽 임계값 (Mbps)</label>
-        <input v-model.number="settings.trafficThresholdMbps" type="number" min="0" />
+        <input
+          v-model.number="settings.trafficThresholdMbps"
+          type="number"
+          min="0"
+        />
       </div>
-      <button type="submit" class="btn-save">저장</button>
+      <button
+        type="submit"
+        class="btn-save"
+      >
+        저장
+      </button>
     </form>
   </div>
 </template>

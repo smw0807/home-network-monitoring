@@ -1,6 +1,8 @@
 <template>
   <div>
-    <h2 class="page-title">접속 이력</h2>
+    <h2 class="page-title">
+      접속 이력
+    </h2>
 
     <table class="table">
       <thead>
@@ -12,9 +14,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr v-for="(event, i) in events" :key="i">
+        <tr
+          v-for="(event, i) in events"
+          :key="i"
+        >
           <td>{{ formatDate(event.timestamp) }}</td>
-          <td class="mono">{{ event.mac }}</td>
+          <td class="mono">
+            {{ event.mac }}
+          </td>
           <td>{{ event.ip }}</td>
           <td>{{ event.vendor ?? '-' }}</td>
         </tr>

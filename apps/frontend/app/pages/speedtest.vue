@@ -1,25 +1,46 @@
 <template>
   <div>
-    <h2 class="page-title">속도 테스트</h2>
+    <h2 class="page-title">
+      속도 테스트
+    </h2>
 
     <div class="run-section">
-      <button class="btn-run" :disabled="isRunning" @click="runTest">
+      <button
+        class="btn-run"
+        :disabled="isRunning"
+        @click="runTest"
+      >
         {{ isRunning ? '측정 중...' : '측정 시작' }}
       </button>
     </div>
 
-    <div v-if="latest" class="result-card">
+    <div
+      v-if="latest"
+      class="result-card"
+    >
       <div class="result-item">
-        <p class="label">다운로드</p>
-        <p class="value">{{ latest.download.toFixed(1) }} <span class="unit">Mbps</span></p>
+        <p class="label">
+          다운로드
+        </p>
+        <p class="value">
+          {{ latest.download.toFixed(1) }} <span class="unit">Mbps</span>
+        </p>
       </div>
       <div class="result-item">
-        <p class="label">업로드</p>
-        <p class="value">{{ latest.upload.toFixed(1) }} <span class="unit">Mbps</span></p>
+        <p class="label">
+          업로드
+        </p>
+        <p class="value">
+          {{ latest.upload.toFixed(1) }} <span class="unit">Mbps</span>
+        </p>
       </div>
       <div class="result-item">
-        <p class="label">핑</p>
-        <p class="value">{{ latest.ping.toFixed(0) }} <span class="unit">ms</span></p>
+        <p class="label">
+          핑
+        </p>
+        <p class="value">
+          {{ latest.ping.toFixed(0) }} <span class="unit">ms</span>
+        </p>
       </div>
     </div>
 
@@ -30,7 +51,10 @@
           <tr><th>시각</th><th>다운로드</th><th>업로드</th><th>핑</th></tr>
         </thead>
         <tbody>
-          <tr v-for="(item, i) in history" :key="i">
+          <tr
+            v-for="(item, i) in history"
+            :key="i"
+          >
             <td>{{ formatDate(item.timestamp) }}</td>
             <td>{{ item.download.toFixed(1) }} Mbps</td>
             <td>{{ item.upload.toFixed(1) }} Mbps</td>
