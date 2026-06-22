@@ -7,6 +7,8 @@ export default () => ({
     pollIntervalMs: parseInt(process.env.POLL_INTERVAL_MS ?? '2000', 10),
   },
   elasticsearch: {
-    node: process.env.ES_NODE ?? 'http://localhost:9200',
+    node: process.env.ES_NODE ?? 'https://localhost:9200',
+    username: process.env.ES_USERNAME ?? 'elastic',
+    password: process.env.ES_PASSWORD ?? '',
   },
 });
