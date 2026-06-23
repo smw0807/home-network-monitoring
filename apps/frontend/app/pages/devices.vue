@@ -1,75 +1,77 @@
 <template>
-  <div>
-    <h2 class="page-title">
-      기기 목록
-    </h2>
+  <UDashboardNavbar title="기기 목록" />
 
-    <div
-      v-if="newDeviceAlert"
-      class="alert"
-    >
-      새 기기 감지: {{ newDeviceAlert.mac }} ({{ newDeviceAlert.ip }})
-      <button @click="newDeviceAlert = null">
-        닫기
-      </button>
+  <UDashboardPanel>
+    <div class="p-6 space-y-4">
+      <UAlert
+        v-if="newDeviceAlert"
+        icon="i-heroicons-exclamation-triangle"
+        color="warning"
+        variant="soft"
+        :title="`새 기기 감지: ${newDeviceAlert.mac}`"
+        :description="`IP: ${newDeviceAlert.ip}`"
+        :close-button="{ icon: 'i-heroicons-x-mark', color: 'neutral', variant: 'link' }"
+        @close="newDeviceAlert = null"
+      />
+
+      <UTable :data="devices" :columns="columns">
+        <template #alias-cell="{ row }">
+          <UInput
+            v-model="editAlias[row.original.mac]"
+            size="xs"
+            placeholder="별명 없음"
+            @blur="saveAlias(row.original.mac)"
+          />
+        </template>
+        <template #isWhitelisted-cell="{ row }">
+          <UToggle
+            :model-value="row.original.isWhitelisted"
+            @update:model-value="(v: boolean) => toggleWhitelist(row.original.mac, v)"
+          />
+        </template>
+        <template #lastSeen-cell="{ row }">
+          {{ formatDate(row.original.lastSeen) }}
+        </template>
+      </UTable>
     </div>
-
-    <table class="table">
-      <thead>
-        <tr>
-          <th>IP</th>
-          <th>MAC</th>
-          <th>제조사</th>
-          <th>별명</th>
-          <th>마지막 접속</th>
-          <th>화이트리스트</th>
-          <th />
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="device in devices"
-          :key="device.mac"
-        >
-          <td>{{ device.ip }}</td>
-          <td class="mono">
-            {{ device.mac }}
-          </td>
-          <td>{{ device.vendor ?? '-' }}</td>
-          <td>
-            <input
-              v-model="editAlias[device.mac]"
-              class="alias-input"
-              placeholder="별명 없음"
-              @blur="saveAlias(device.mac)"
-            />
-          </td>
-          <td>{{ formatDate(device.lastSeen) }}</td>
-          <td>
-            <input
-              type="checkbox"
-              :checked="device.isWhitelisted"
-              @change="toggleWhitelist(device.mac, !device.isWhitelisted)"
-            />
-          </td>
-          <td />
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
+interface Device {
+  mac: string;
+  ip: string;
+  hostname?: string;
+  alias?: string;
+  vendor?: string;
+  isWhitelisted: boolean;
+  lastSeen: string;
+  firstSeen: string;
+}
+
 const { devices, newDeviceAlert, updateDevice } = useDevices();
 const editAlias = ref<Record<string, string>>({});
 
-watch(devices, (list) => {
-  list.forEach((d) => {
-    if (!(d.mac in editAlias.value)) {
-      editAlias.value[d.mac] = d.alias ?? '';
-    }
-  });
-}, { immediate: true });
+const columns = [
+  { accessorKey: 'ip', header: 'IP' },
+  { accessorKey: 'mac', header: 'MAC' },
+  { accessorKey: 'vendor', header: '제조사' },
+  { accessorKey: 'alias', header: '별명' },
+  { accessorKey: 'lastSeen', header: '마지막 접속' },
+  { accessorKey: 'isWhitelisted', header: '화이트리스트' },
+];
+
+watch(
+  devices,
+  (list) => {
+    list.forEach((d: Device) => {
+      if (!(d.mac in editAlias.value)) {
+        editAlias.value[d.mac] = d.alias ?? '';
+      }
+    });
+  },
+  { immediate: true },
+);
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleString('ko-KR');
@@ -83,36 +85,3 @@ async function toggleWhitelist(mac: string, value: boolean) {
   await updateDevice(mac, { isWhitelisted: value });
 }
 </script>
-
-<style scoped>
-.page-title { font-size: 1.4rem; margin-bottom: 1.5rem; color: #00e676; }
-
-.alert {
-  background: #2a1a1a;
-  border: 1px solid #ff6b6b;
-  border-radius: 6px;
-  padding: 0.8rem 1rem;
-  margin-bottom: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td {
-  padding: 0.7rem 0.8rem;
-  text-align: left;
-  border-bottom: 1px solid #2a2a3e;
-}
-.table th { font-size: 0.8rem; color: #888; }
-.mono { font-family: monospace; font-size: 0.85rem; }
-
-.alias-input {
-  background: transparent;
-  border: 1px solid #333;
-  border-radius: 4px;
-  color: #e0e0e0;
-  padding: 0.2rem 0.4rem;
-  width: 120px;
-}
-</style>

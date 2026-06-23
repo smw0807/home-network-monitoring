@@ -1,69 +1,70 @@
 <template>
-  <div>
-    <h2 class="page-title">
-      속도 테스트
-    </h2>
+  <UDashboardNavbar title="속도 테스트" />
 
-    <div class="run-section">
-      <button
-        class="btn-run"
-        :disabled="isRunning"
-        @click="runTest"
-      >
-        {{ isRunning ? '측정 중...' : '측정 시작' }}
-      </button>
-    </div>
+  <UDashboardPanel>
+    <div class="p-6 space-y-6">
+      <div class="flex items-center gap-4">
+        <UButton
+          :loading="isRunning"
+          :disabled="isRunning"
+          icon="i-heroicons-play"
+          @click="runTest"
+        >
+          {{ isRunning ? '측정 중...' : '측정 시작' }}
+        </UButton>
+      </div>
 
-    <div
-      v-if="latest"
-      class="result-card"
-    >
-      <div class="result-item">
-        <p class="label">
-          다운로드
-        </p>
-        <p class="value">
-          {{ latest.download.toFixed(1) }} <span class="unit">Mbps</span>
-        </p>
+      <div v-if="latest" class="grid grid-cols-3 gap-4">
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            다운로드
+          </div>
+          <div class="text-2xl font-bold">
+            {{ latest.download.toFixed(1) }}
+            <span class="text-sm font-normal text-muted">Mbps</span>
+          </div>
+        </UCard>
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            업로드
+          </div>
+          <div class="text-2xl font-bold">
+            {{ latest.upload.toFixed(1) }}
+            <span class="text-sm font-normal text-muted">Mbps</span>
+          </div>
+        </UCard>
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            핑
+          </div>
+          <div class="text-2xl font-bold">
+            {{ latest.ping.toFixed(0) }}
+            <span class="text-sm font-normal text-muted">ms</span>
+          </div>
+        </UCard>
       </div>
-      <div class="result-item">
-        <p class="label">
-          업로드
-        </p>
-        <p class="value">
-          {{ latest.upload.toFixed(1) }} <span class="unit">Mbps</span>
-        </p>
-      </div>
-      <div class="result-item">
-        <p class="label">
-          핑
-        </p>
-        <p class="value">
-          {{ latest.ping.toFixed(0) }} <span class="unit">ms</span>
-        </p>
-      </div>
-    </div>
 
-    <div class="history-section">
-      <h3>측정 이력</h3>
-      <table class="table">
-        <thead>
-          <tr><th>시각</th><th>다운로드</th><th>업로드</th><th>핑</th></tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(item, i) in history"
-            :key="i"
-          >
-            <td>{{ formatDate(item.timestamp) }}</td>
-            <td>{{ item.download.toFixed(1) }} Mbps</td>
-            <td>{{ item.upload.toFixed(1) }} Mbps</td>
-            <td>{{ item.ping.toFixed(0) }} ms</td>
-          </tr>
-        </tbody>
-      </table>
+      <UCard>
+        <template #header>
+          <span class="text-sm font-medium">측정 이력</span>
+        </template>
+        <UTable :data="history" :columns="columns">
+          <template #timestamp-cell="{ row }">
+            {{ formatDate(row.original.timestamp) }}
+          </template>
+          <template #download-cell="{ row }">
+            {{ row.original.download.toFixed(1) }} Mbps
+          </template>
+          <template #upload-cell="{ row }">
+            {{ row.original.upload.toFixed(1) }} Mbps
+          </template>
+          <template #ping-cell="{ row }">
+            {{ row.original.ping.toFixed(0) }} ms
+          </template>
+        </UTable>
+      </UCard>
     </div>
-  </div>
+  </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
@@ -78,6 +79,13 @@ const config = useRuntimeConfig();
 const isRunning = ref(false);
 const latest = ref<SpeedResult | null>(null);
 const history = ref<SpeedResult[]>([]);
+
+const columns = [
+  { accessorKey: 'timestamp', header: '시각' },
+  { accessorKey: 'download', header: '다운로드' },
+  { accessorKey: 'upload', header: '업로드' },
+  { accessorKey: 'ping', header: '핑' },
+];
 
 const { on } = useWebSocket();
 on<SpeedResult>('speedtest_result', (result) => {
@@ -102,33 +110,3 @@ function formatDate(iso: string) {
 
 onMounted(loadHistory);
 </script>
-
-<style scoped>
-.page-title { font-size: 1.4rem; margin-bottom: 1.5rem; color: #00e676; }
-.run-section { margin-bottom: 2rem; }
-.btn-run {
-  background: #00e676;
-  color: #1a1a2e;
-  border: none;
-  border-radius: 8px;
-  padding: 0.8rem 2rem;
-  font-size: 1rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-.btn-run:disabled { opacity: 0.5; cursor: not-allowed; }
-.result-card {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-.result-item { background: #1a1a2e; border-radius: 8px; padding: 1.2rem; }
-.label { font-size: 0.8rem; color: #888; margin-bottom: 0.4rem; }
-.value { font-size: 1.8rem; font-weight: 700; color: #fff; }
-.unit { font-size: 0.9rem; color: #888; }
-.history-section h3 { font-size: 1rem; margin-bottom: 1rem; }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: 0.7rem 0.8rem; text-align: left; border-bottom: 1px solid #2a2a3e; }
-.table th { font-size: 0.8rem; color: #888; }
-</style>

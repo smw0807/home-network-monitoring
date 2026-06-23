@@ -1,53 +1,68 @@
 <template>
-  <div>
-    <h2 class="page-title">
-      대시보드
-    </h2>
+  <UDashboardNavbar title="대시보드" />
 
-    <div class="stat-cards">
-      <div class="card">
-        <p class="label">
-          ↓ 수신 속도
-        </p>
-        <p class="value">
-          {{ inMbps.toFixed(2) }} <span class="unit">Mbps</span>
-        </p>
-      </div>
-      <div class="card">
-        <p class="label">
-          ↑ 송신 속도
-        </p>
-        <p class="value">
-          {{ outMbps.toFixed(2) }} <span class="unit">Mbps</span>
-        </p>
-      </div>
-      <div class="card">
-        <p class="label">
-          총 수신량
-        </p>
-        <p class="value">
-          {{ formatBytes(current?.totalIn ?? 0) }}
-        </p>
-      </div>
-      <div class="card">
-        <p class="label">
-          총 송신량
-        </p>
-        <p class="value">
-          {{ formatBytes(current?.totalOut ?? 0) }}
-        </p>
-      </div>
-    </div>
+  <UDashboardPanel>
+    <div class="p-6 space-y-6">
+      <!-- 실시간 속도 카드 -->
+      <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            ↓ 수신 속도
+          </div>
+          <div class="text-2xl font-bold">
+            {{ inMbps.toFixed(2) }}
+            <span class="text-sm font-normal text-muted">Mbps</span>
+          </div>
+        </UCard>
 
-    <div class="chart-section">
-      <h3>실시간 트래픽 (최근 60포인트)</h3>
-      <canvas
-        ref="chartCanvas"
-        width="800"
-        height="300"
-      />
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            ↑ 송신 속도
+          </div>
+          <div class="text-2xl font-bold">
+            {{ outMbps.toFixed(2) }}
+            <span class="text-sm font-normal text-muted">Mbps</span>
+          </div>
+        </UCard>
+
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            총 수신량
+          </div>
+          <div class="text-2xl font-bold">
+            {{ formatBytes(current?.totalIn ?? 0) }}
+          </div>
+        </UCard>
+
+        <UCard>
+          <div class="text-xs text-muted mb-1">
+            총 송신량
+          </div>
+          <div class="text-2xl font-bold">
+            {{ formatBytes(current?.totalOut ?? 0) }}
+          </div>
+        </UCard>
+      </div>
+
+      <!-- 실시간 차트 -->
+      <UCard>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">실시간 트래픽</span>
+            <div class="flex items-center gap-3 text-xs text-muted">
+              <span class="flex items-center gap-1">
+                <span class="inline-block w-3 h-0.5 bg-primary" />수신
+              </span>
+              <span class="flex items-center gap-1">
+                <span class="inline-block w-3 h-0.5 bg-rose-500" />송신
+              </span>
+            </div>
+          </div>
+        </template>
+        <canvas ref="chartCanvas" class="w-full h-48" width="800" height="192" />
+      </UCard>
     </div>
-  </div>
+  </UDashboardPanel>
 </template>
 
 <script setup lang="ts">
@@ -61,9 +76,13 @@ function formatBytes(bytes: number): string {
   return `${(bytes / 1024 / 1024 / 1024).toFixed(2)} GB`;
 }
 
-watch(history, () => {
-  drawChart();
-}, { deep: true });
+watch(
+  history,
+  () => {
+    drawChart();
+  },
+  { deep: true },
+);
 
 function drawChart() {
   const canvas = chartCanvas.value;
@@ -81,7 +100,7 @@ function drawChart() {
   const maxBps = Math.max(...points.map((p) => Math.max(p.inBps, p.outBps)), 1);
   const stepX = w / (points.length - 1);
 
-  const drawLine = (color: string, getValue: (p: typeof points[0]) => number) => {
+  const drawLine = (color: string, getValue: (p: (typeof points)[0]) => number) => {
     ctx.beginPath();
     ctx.strokeStyle = color;
     ctx.lineWidth = 2;
@@ -93,64 +112,7 @@ function drawChart() {
     ctx.stroke();
   };
 
-  drawLine('#00e676', (p) => p.inBps);
-  drawLine('#ff6b6b', (p) => p.outBps);
+  drawLine('#10b981', (p) => p.inBps);
+  drawLine('#f43f5e', (p) => p.outBps);
 }
 </script>
-
-<style scoped>
-.page-title {
-  font-size: 1.4rem;
-  margin-bottom: 1.5rem;
-  color: #00e676;
-}
-
-.stat-cards {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.card {
-  background: #1a1a2e;
-  border-radius: 8px;
-  padding: 1.2rem;
-}
-
-.label {
-  font-size: 0.8rem;
-  color: #888;
-  margin-bottom: 0.4rem;
-}
-
-.value {
-  font-size: 1.6rem;
-  font-weight: 700;
-  color: #fff;
-}
-
-.unit {
-  font-size: 0.9rem;
-  color: #888;
-}
-
-.chart-section {
-  background: #1a1a2e;
-  border-radius: 8px;
-  padding: 1.2rem;
-}
-
-.chart-section h3 {
-  font-size: 0.9rem;
-  color: #888;
-  margin-bottom: 1rem;
-}
-
-canvas {
-  width: 100%;
-  height: auto;
-  background: #0f0f1a;
-  border-radius: 4px;
-}
-</style>
