@@ -2,17 +2,18 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ArpService } from '../arp/arp.service';
+import { ElasticService } from '../elastic/elastic.service';
 import { Device } from '../arp/arp.types';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Injectable()
 export class DevicesService {
   private readonly logger = new Logger(DevicesService.name);
-  // In-memory store — will be backed by Elasticsearch in Phase 3
   private readonly devices = new Map<string, Device>();
 
   constructor(
     private readonly arp: ArpService,
+    private readonly elastic: ElasticService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -35,6 +36,9 @@ export class DevicesService {
         this.devices.set(entry.mac, device);
         this.eventEmitter.emit('device.new', { ...device, detectedAt: now });
         this.logger.log(`New device detected: ${entry.mac} (${entry.ip})`);
+        this.elastic.indexDevice({ ...device, isNew: true }).catch((err) => {
+          this.logger.error('Failed to index new device', err);
+        });
       } else {
         existing.ip = entry.ip;
         existing.lastSeen = now;
