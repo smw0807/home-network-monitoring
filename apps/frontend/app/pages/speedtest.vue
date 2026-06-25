@@ -44,6 +44,19 @@
         </UCard>
       </div>
 
+      <!-- 이력 차트 -->
+      <UCard v-if="history.length > 0">
+        <template #header>
+          <span class="text-sm font-medium">속도 추이</span>
+        </template>
+        <div class="h-64">
+          <ClientOnly>
+            <SpeedtestChart :history="history" />
+          </ClientOnly>
+        </div>
+      </UCard>
+
+      <!-- 이력 테이블 -->
       <UCard>
         <template #header>
           <span class="text-sm font-medium">측정 이력</span>

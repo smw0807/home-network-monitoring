@@ -3,6 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ArpService } from '../arp/arp.service';
 import { ElasticService } from '../elastic/elastic.service';
+import { VendorService } from './vendor.service';
 import { Device } from '../arp/arp.types';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 
@@ -14,6 +15,7 @@ export class DevicesService {
   constructor(
     private readonly arp: ArpService,
     private readonly elastic: ElasticService,
+    private readonly vendor: VendorService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 
@@ -29,6 +31,7 @@ export class DevicesService {
         const device: Device = {
           mac: entry.mac,
           ip: entry.ip,
+          vendor: this.vendor.lookup(entry.mac),
           isWhitelisted: false,
           firstSeen: now,
           lastSeen: now,
