@@ -1,7 +1,7 @@
 <template>
   <UDashboardNavbar title="접속 이력" />
 
-  <UDashboardPanel>
+  <UDashboardPanel class="overflow-y-auto">
     <div class="p-6">
       <UTable :data="events" :columns="columns">
         <template #timestamp-cell="{ row }">

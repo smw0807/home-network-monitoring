@@ -1,7 +1,7 @@
 <template>
   <UDashboardNavbar title="설정" />
 
-  <UDashboardPanel>
+  <UDashboardPanel class="overflow-y-auto">
     <div class="p-6 max-w-xl space-y-6">
       <UCard>
         <template #header>

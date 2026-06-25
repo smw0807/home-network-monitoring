@@ -1,7 +1,7 @@
 <template>
   <UDashboardNavbar title="대시보드" />
 
-  <UDashboardPanel>
+  <UDashboardPanel class="overflow-y-auto">
     <div class="p-6 space-y-6">
       <!-- 실시간 속도 카드 -->
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">

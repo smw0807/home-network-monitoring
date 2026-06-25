@@ -1,7 +1,7 @@
 <template>
   <UDashboardNavbar title="속도 테스트" />
 
-  <UDashboardPanel>
+  <UDashboardPanel class="overflow-y-auto">
     <div class="p-6 space-y-6">
       <div class="flex items-center gap-4">
         <UButton

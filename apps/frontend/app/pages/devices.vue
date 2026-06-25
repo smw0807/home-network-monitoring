@@ -1,7 +1,7 @@
 <template>
   <UDashboardNavbar title="기기 목록" />
 
-  <UDashboardPanel>
+  <UDashboardPanel class="overflow-y-auto">
     <div class="p-6 space-y-4">
       <UAlert
         v-if="newDeviceAlert"

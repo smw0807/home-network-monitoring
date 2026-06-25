@@ -1,7 +1,7 @@
 <template>
   <UDashboardNavbar title="히스토리" />
 
-  <UDashboardPanel>
+  <UDashboardPanel class="overflow-y-auto">
     <div class="p-6 space-y-4">
       <div class="flex items-center gap-3">
         <USelect
