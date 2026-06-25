@@ -3,36 +3,17 @@
 
   <UDashboardPanel>
     <div class="p-6 space-y-4">
-      <!-- 필터 + 뷰 전환 -->
-      <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
         <USelect
           v-model="range"
           :items="rangeOptions"
           class="w-40"
           @update:model-value="fetchHistory"
         />
-        <UButtonGroup>
-          <UButton
-            :variant="view === 'chart' ? 'solid' : 'outline'"
-            icon="i-heroicons-chart-bar"
-            size="sm"
-            @click="view = 'chart'"
-          >
-            차트
-          </UButton>
-          <UButton
-            :variant="view === 'table' ? 'solid' : 'outline'"
-            icon="i-heroicons-table-cells"
-            size="sm"
-            @click="view = 'table'"
-          >
-            테이블
-          </UButton>
-        </UButtonGroup>
       </div>
 
-      <!-- 차트 뷰 -->
-      <UCard v-if="view === 'chart'">
+      <!-- 차트 -->
+      <UCard>
         <template #header>
           <span class="text-sm font-medium">시간별 평균 트래픽</span>
         </template>
@@ -46,17 +27,14 @@
         </div>
       </UCard>
 
-      <!-- 테이블 뷰 -->
-      <UCard v-else>
+      <!-- 테이블 -->
+      <UCard>
         <template #header>
-          <div class="flex items-center justify-between">
-            <span class="text-sm font-medium">
-              시간별 평균 트래픽
-              <span class="ml-2 text-xs text-muted font-normal">({{ tableRows.length }}건, 최신순)</span>
-            </span>
-          </div>
+          <span class="text-sm font-medium">
+            상세 데이터
+            <span class="ml-2 text-xs text-muted font-normal">({{ tableRows.length }}건, 최신순)</span>
+          </span>
         </template>
-
         <div v-if="tableRows.length === 0" class="flex items-center justify-center py-12 text-muted text-sm">
           데이터가 없습니다
         </div>
@@ -104,7 +82,6 @@ interface TableRow {
 
 const config = useRuntimeConfig();
 const range = ref('1h');
-const view = ref<'chart' | 'table'>('chart');
 const buckets = ref<Bucket[]>([]);
 
 const rangeOptions = [
@@ -128,7 +105,6 @@ const columns = [
   { accessorKey: 'samples',  header: '샘플 수' },
 ];
 
-// 최신 데이터가 위로 오도록 역순 변환
 const tableRows = computed<TableRow[]>(() =>
   [...buckets.value].reverse().map((b) => ({
     timestamp: formatLabel(b.key_as_string, range.value),
@@ -153,24 +129,14 @@ function bpsToMbps(bps: number): string {
 function formatLabel(iso: string, r: string): string {
   const d = new Date(iso);
   if (r === '1h' || r === '6h') {
-    return d.toLocaleString('ko-KR', {
-      month: 'numeric', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    return d.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
   if (r === '24h') {
-    return d.toLocaleString('ko-KR', {
-      month: 'numeric', day: 'numeric',
-      hour: '2-digit', minute: '2-digit',
-    });
+    return d.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
-  return d.toLocaleString('ko-KR', {
-    month: 'numeric', day: 'numeric',
-    weekday: 'short', hour: '2-digit',
-  });
+  return d.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', weekday: 'short', hour: '2-digit' });
 }
 
-// 속도에 따라 색상 클래스 반환
 function speedColor(mbpsStr: string): string {
   const v = parseFloat(mbpsStr);
   if (v >= 50) return 'text-red-500';
