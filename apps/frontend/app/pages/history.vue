@@ -3,16 +3,36 @@
 
   <UDashboardPanel>
     <div class="p-6 space-y-4">
-      <div class="flex items-center gap-3">
+      <!-- 필터 + 뷰 전환 -->
+      <div class="flex items-center justify-between">
         <USelect
           v-model="range"
           :items="rangeOptions"
           class="w-40"
           @update:model-value="fetchHistory"
         />
+        <UButtonGroup>
+          <UButton
+            :variant="view === 'chart' ? 'solid' : 'outline'"
+            icon="i-heroicons-chart-bar"
+            size="sm"
+            @click="view = 'chart'"
+          >
+            차트
+          </UButton>
+          <UButton
+            :variant="view === 'table' ? 'solid' : 'outline'"
+            icon="i-heroicons-table-cells"
+            size="sm"
+            @click="view = 'table'"
+          >
+            테이블
+          </UButton>
+        </UButtonGroup>
       </div>
 
-      <UCard>
+      <!-- 차트 뷰 -->
+      <UCard v-if="view === 'chart'">
         <template #header>
           <span class="text-sm font-medium">시간별 평균 트래픽</span>
         </template>
@@ -25,6 +45,40 @@
           </ClientOnly>
         </div>
       </UCard>
+
+      <!-- 테이블 뷰 -->
+      <UCard v-else>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">
+              시간별 평균 트래픽
+              <span class="ml-2 text-xs text-muted font-normal">({{ tableRows.length }}건, 최신순)</span>
+            </span>
+          </div>
+        </template>
+
+        <div v-if="tableRows.length === 0" class="flex items-center justify-center py-12 text-muted text-sm">
+          데이터가 없습니다
+        </div>
+        <UTable v-else :data="tableRows" :columns="columns">
+          <template #timestamp-cell="{ row }">
+            <span class="text-xs font-mono">{{ row.original.timestamp }}</span>
+          </template>
+          <template #inMbps-cell="{ row }">
+            <span :class="speedColor(row.original.inMbps)" class="font-medium tabular-nums">
+              {{ row.original.inMbps }}
+            </span>
+          </template>
+          <template #outMbps-cell="{ row }">
+            <span :class="speedColor(row.original.outMbps)" class="font-medium tabular-nums">
+              {{ row.original.outMbps }}
+            </span>
+          </template>
+          <template #samples-cell="{ row }">
+            <span class="text-muted text-xs tabular-nums">{{ row.original.samples }}</span>
+          </template>
+        </UTable>
+      </UCard>
     </div>
   </UDashboardPanel>
 </template>
@@ -32,6 +86,7 @@
 <script setup lang="ts">
 interface Bucket {
   key_as_string: string;
+  doc_count: number;
   avg_in: { value: number | null };
   avg_out: { value: number | null };
 }
@@ -40,8 +95,16 @@ interface HistoryAggregation {
   traffic_over_time: { buckets: Bucket[] };
 }
 
+interface TableRow {
+  timestamp: string;
+  inMbps: string;
+  outMbps: string;
+  samples: number;
+}
+
 const config = useRuntimeConfig();
 const range = ref('1h');
+const view = ref<'chart' | 'table'>('chart');
 const buckets = ref<Bucket[]>([]);
 
 const rangeOptions = [
@@ -58,12 +121,62 @@ const rangeToInterval: Record<string, string> = {
   '7d': '3h',
 };
 
+const columns = [
+  { accessorKey: 'timestamp', header: '시각' },
+  { accessorKey: 'inMbps',   header: '평균 수신 (Mbps)' },
+  { accessorKey: 'outMbps',  header: '평균 송신 (Mbps)' },
+  { accessorKey: 'samples',  header: '샘플 수' },
+];
+
+// 최신 데이터가 위로 오도록 역순 변환
+const tableRows = computed<TableRow[]>(() =>
+  [...buckets.value].reverse().map((b) => ({
+    timestamp: formatLabel(b.key_as_string, range.value),
+    inMbps:  bpsToMbps(b.avg_in.value ?? 0),
+    outMbps: bpsToMbps(b.avg_out.value ?? 0),
+    samples: b.doc_count,
+  })),
+);
+
 async function fetchHistory() {
   const interval = rangeToInterval[range.value];
   const data = await $fetch<HistoryAggregation>(
     `${config.public.apiUrl}/api/traffic/history?from=now-${range.value}&to=now&interval=${interval}`,
   );
   buckets.value = data?.traffic_over_time?.buckets ?? [];
+}
+
+function bpsToMbps(bps: number): string {
+  return ((bps * 8) / 1_000_000).toFixed(2);
+}
+
+function formatLabel(iso: string, r: string): string {
+  const d = new Date(iso);
+  if (r === '1h' || r === '6h') {
+    return d.toLocaleString('ko-KR', {
+      month: 'numeric', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+  if (r === '24h') {
+    return d.toLocaleString('ko-KR', {
+      month: 'numeric', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+  return d.toLocaleString('ko-KR', {
+    month: 'numeric', day: 'numeric',
+    weekday: 'short', hour: '2-digit',
+  });
+}
+
+// 속도에 따라 색상 클래스 반환
+function speedColor(mbpsStr: string): string {
+  const v = parseFloat(mbpsStr);
+  if (v >= 50) return 'text-red-500';
+  if (v >= 10) return 'text-yellow-500';
+  if (v > 0)   return 'text-emerald-500';
+  return 'text-muted';
 }
 
 onMounted(fetchHistory);
