@@ -15,14 +15,16 @@ export class ElasticService implements OnModuleInit {
   readonly client: Client;
 
   constructor(private readonly config: ConfigService) {
+    const node = this.config.get<string>('elasticsearch.node')!;
+    const username = this.config.get<string>('elasticsearch.username') ?? '';
+    const password = this.config.get<string>('elasticsearch.password') ?? '';
+    const isHttps = node.startsWith('https');
+
     this.client = new Client({
-      node: this.config.get<string>('elasticsearch.node')!,
-      auth: {
-        username: this.config.get<string>('elasticsearch.username')!,
-        password: this.config.get<string>('elasticsearch.password')!,
-      },
-      // self-signed 인증서 허용 (홈 네트워크 내부용)
-      tls: { rejectUnauthorized: false },
+      node,
+      ...(isHttps && username ? { auth: { username, password } } : {}),
+      // self-signed 인증서 허용 (홈 네트워크 내부용, HTTPS 전용)
+      ...(isHttps ? { tls: { rejectUnauthorized: false } } : {}),
     });
   }
 
