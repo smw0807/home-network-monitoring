@@ -171,3 +171,37 @@ curl http://localhost:9200/_cat/indices?v
 | `new_device` | `{ mac, ip, vendor, detectedAt }` |
 | `speedtest_result` | `{ download, upload, ping, timestamp }` |
 | `error` | `{ message }` |
+
+---
+
+## 구현 화면
+
+### 대시보드
+실시간 WAN IN/OUT 트래픽 차트 및 속도 카드
+
+![대시보드](imgs/dashboard.png)
+
+### 기기 목록
+ARP 스캔으로 탐지된 연결 기기, 별명·화이트리스트 관리
+
+![기기 목록](imgs/device-list.png)
+
+### 트래픽 히스토리
+기간별(1h/6h/24h/7d) 트래픽 차트 + 테이블 조회
+
+![히스토리](imgs/history.png)
+
+### 속도 테스트
+Cloudflare 기반 DL/UL/핑 측정 및 이력 차트
+
+![속도 테스트](imgs/speed-test.png)
+
+### 신규 기기 접속 이력
+미등록 기기 감지 이벤트 로그
+
+![접속 이력](imgs/access-history.png)
+
+### 설정
+SNMP 파라미터 및 데이터 보존 기간 설정
+
+![설정](imgs/settings.png)
