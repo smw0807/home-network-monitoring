@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ArpService } from '../arp/arp.service';
@@ -8,7 +8,7 @@ import { Device } from '../arp/arp.types';
 import { UpdateDeviceDto } from './dto/update-device.dto';
 
 @Injectable()
-export class DevicesService {
+export class DevicesService implements OnModuleInit {
   private readonly logger = new Logger(DevicesService.name);
   private readonly devices = new Map<string, Device>();
 
@@ -18,6 +18,22 @@ export class DevicesService {
     private readonly vendor: VendorService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  async onModuleInit() {
+    const known = await this.elastic.loadKnownDevices();
+    for (const [mac, data] of known) {
+      this.devices.set(mac, {
+        mac,
+        ip: (data.ip as string) ?? '',
+        alias: data.alias,
+        vendor: data.vendor,
+        isWhitelisted: data.isWhitelisted ?? false,
+        firstSeen: data.firstSeen ? new Date(data.firstSeen as unknown as string) : new Date(),
+        lastSeen: new Date(),
+      });
+    }
+    this.logger.log(`Restored ${known.size} known devices from Elasticsearch`);
+  }
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async refresh() {

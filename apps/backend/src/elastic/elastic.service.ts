@@ -116,4 +116,39 @@ export class ElasticService implements OnModuleInit {
     });
     return result.hits.hits.map((h) => h._source);
   }
+
+  // MAC별 가장 최근 device-logs 문서를 가져와 기기 레지스트리 복원
+  async loadKnownDevices(): Promise<Map<string, Partial<Device>>> {
+    const map = new Map<string, Partial<Device>>();
+    try {
+      const result = await this.client.search({
+        index: INDEX_DEVICES,
+        size: 0,
+        aggs: {
+          by_mac: {
+            terms: { field: 'mac', size: 10000 },
+            aggs: {
+              latest: {
+                top_hits: {
+                  size: 1,
+                  sort: [{ timestamp: { order: 'desc' } }],
+                },
+              },
+            },
+          },
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const byMac = result.aggregations?.by_mac as any;
+      for (const bucket of byMac?.buckets ?? []) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const src = bucket.latest?.hits?.hits?.[0]?._source as any;
+        if (src?.mac) map.set(src.mac as string, src);
+      }
+    } catch {
+      // 인덱스 미생성 또는 ES 미연결 — 빈 Map으로 정상 시작
+    }
+    return map;
+  }
 }
