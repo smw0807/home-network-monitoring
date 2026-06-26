@@ -29,29 +29,20 @@ export class ArpService {
           for (const vb of varbinds) {
             if (snmp.isVarbindError(vb)) continue;
             const oidParts = vb.oid.split('.');
-            // OID structure: 1.3.6.1.2.1.4.22.1.{col}.{ifIndex}.{ip}
-            if (oidParts.length >= 13) {
-              const col = oidParts[9];
-              // col 2 = ifIndex, col 3 = ip
-              if (col === '2') {
-                const ifIndex = vb.value as number;
-                const ipAddr = oidParts.slice(10).join('.');
-                entries.push({ ip: ipAddr, mac: '', ifIndex });
-              }
-              if (col === '3') {
-                const macBytes = vb.value as Buffer;
-                const mac = Array.from(macBytes)
-                  .map((b) => b.toString(16).padStart(2, '0'))
-                  .join(':');
-                const ipAddr = oidParts.slice(10).join('.');
-                const existing = entries.find((e) => e.ip === ipAddr);
-                if (existing) {
-                  existing.mac = mac;
-                } else {
-                  entries.push({ ip: ipAddr, mac, ifIndex: 0 });
-                }
-              }
-            }
+            // OID: 1.3.6.1.2.1.4.22.1.{col}.{ifIndex}.{ip1}.{ip2}.{ip3}.{ip4}
+            //      0 1 2 3 4 5 6  7  8   9      10      11   12   13   14
+            if (oidParts.length < 15) continue;
+            const col = oidParts[9];
+            // col=2 = ipNetToMediaPhysAddress (MAC, OctetString 6바이트)
+            if (col !== '2') continue;
+            const macBytes = vb.value as Buffer;
+            if (!Buffer.isBuffer(macBytes) || macBytes.length < 6) continue;
+            const mac = Array.from(macBytes)
+              .map((b) => b.toString(16).padStart(2, '0'))
+              .join(':');
+            const ifIndex = parseInt(oidParts[10], 10);
+            const ip = oidParts.slice(11).join('.');
+            entries.push({ ip, mac, ifIndex });
           }
         },
         (error) => {
@@ -59,7 +50,7 @@ export class ArpService {
             this.logger.error(`ARP scan failed: ${error.message}`);
           }
           session.close();
-          resolve(entries.filter((e) => e.mac !== ''));
+          resolve(entries);
         },
       );
     });
